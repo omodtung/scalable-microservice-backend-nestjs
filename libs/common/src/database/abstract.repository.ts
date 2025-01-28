@@ -1,5 +1,6 @@
-import { Model, Document, Types, FilterQuery, UpdateQuery } from 'mongoose';
-import { AbstractDocument } from './abstract.document';
+import { Model, Types, FilterQuery, UpdateQuery } from 'mongoose';
+// import { AbstractDocument } from './abstract.document';
+import { AbstractDocument } from './abstract.schema';
 import { Logger } from '@nestjs/common';
 import { NotFoundException } from '@nestjs/common';
 export abstract class AbstractRepository<TDocument extends AbstractDocument> {
@@ -10,7 +11,7 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
       ...documnents,
       _id: new Types.ObjectId(),
     });
-    return (await createdDocument.save()).toJson() as unknown as TDocument;
+    return (await createdDocument.save()).toJSON() as unknown as TDocument;
   }
 
   async findOne(filterQuery: FilterQuery<TDocument>): Promise<TDocument> {
