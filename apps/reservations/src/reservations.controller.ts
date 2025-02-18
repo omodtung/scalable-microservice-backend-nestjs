@@ -6,12 +6,18 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
+import { JwtAuthGuard } from '@app/common/auth';
+import { CurrentUser } from '@app/common/decorators';
+import { UserDto } from '@app/common';
 
-@Controller()
+@Controller('reservation')
 export class ReservationsController {
   constructor(private readonly reservationsService: ReservationsService) {}
 
@@ -25,9 +31,26 @@ export class ReservationsController {
     return this.reservationsService.findOne(id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createReservationDto: CreateReservationDto) {
-    return this.reservationsService.create(createReservationDto);
+  async create(
+    @Body() createReservationDto: CreateReservationDto,
+    @CurrentUser() user: UserDto,
+  ) {
+    try {
+      console.log('----------user-----', user);
+      console.log('----------reservation-----', createReservationDto);
+
+      return await this.reservationsService.create(
+        createReservationDto,
+        user._id,
+      );
+    } catch (error) {
+      throw new HttpException(
+        'Failed to create reservation',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Put(':id')
